@@ -170,23 +170,23 @@ public class RepairTicketController : ControllerBase
         CancellationToken cancellationToken
     )
     {
-        // 從 JWT 取得登入者 ID
-        var userIdClaim =
-            User.FindFirst(
-                ClaimTypes.NameIdentifier
-            );
+         // 從 JWT 取得登入者 ID
+    var userIdClaim =
+        User.FindFirst(
+            ClaimTypes.NameIdentifier
+        );
 
 
-        if (userIdClaim == null)
-        {
-            return Unauthorized();
-        }
+    if (userIdClaim == null)
+    {
+        return Unauthorized();
+    }
 
 
-        int userId =
-            int.Parse(
-                userIdClaim.Value
-            );
+    int userId =
+        int.Parse(
+            userIdClaim.Value
+        );
 
         //驗證
         var allowedStatuses = new[]
