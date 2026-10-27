@@ -4,7 +4,7 @@ public class TicketStatusHistory
 {
     public int Id { get; set; }
 
-
+    // 對應哪一張工單
     public int TicketId { get; set; }
 
 

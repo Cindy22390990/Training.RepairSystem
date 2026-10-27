@@ -133,7 +133,11 @@ public class RepairTicketRepository : IRepairTicketRepository
         }
         // 原本狀態
         var oldStatus = ticket.Status;
-
+        // 狀態沒有改變，不建立歷程
+        if (oldStatus == status)
+        {
+            return ticket;
+        }
         // 修改維修單狀態。
         ticket.Status = status;
 
@@ -167,6 +171,16 @@ public class RepairTicketRepository : IRepairTicketRepository
 
         return ticket;
     }
-    
-    
+
+    public async Task<List<TicketStatusHistory>> GetStatusHistoryAsync(
+    int ticketId,
+    CancellationToken cancellationToken = default
+)
+    {
+        return await _context.TicketStatusHistories
+            .Where(x => x.TicketId == ticketId)
+            .OrderBy(x => x.ChangedAtUtc)
+            .ToListAsync(cancellationToken);
+    }
+
 }

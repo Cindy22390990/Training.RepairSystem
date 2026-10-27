@@ -295,6 +295,37 @@ public class RepairTicketService : IRepairTicketService
 
         return ticket;
     }
-    
-    
+    public async Task<List<TicketStatusHistoryDto>> GetStatusHistoryAsync(
+        int ticketId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var histories =
+            await _repository.GetStatusHistoryAsync(
+                ticketId,
+                cancellationToken
+            );
+
+
+        return histories
+            .Select(x => new TicketStatusHistoryDto
+            {
+                Id = x.Id,
+
+                TicketId = x.TicketId,
+
+                OldStatus = x.OldStatus,
+
+                NewStatus = x.NewStatus,
+
+                ChangedByUserId = x.ChangedByUserId,
+
+                ChangedAtUtc = x.ChangedAtUtc,
+
+                Note = x.Note
+
+            })
+            .ToList();
+    }
+
 }

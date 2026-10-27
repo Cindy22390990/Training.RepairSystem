@@ -225,4 +225,22 @@ public class RepairTicketController : ControllerBase
 
         return Ok(result);
     }
+    // 查詢工單狀態歷程
+    // GET api/RepairTicket/{id}/history
+
+    [Authorize]
+    [HttpGet("{id}/history")]
+    public async Task<IActionResult> GetStatusHistory(
+        int id,
+        CancellationToken cancellationToken
+    )
+    {
+        var result =
+            await _repairTicketService.GetStatusHistoryAsync(
+                id,
+                cancellationToken
+            );
+
+        return Ok(result);
+    }
 }

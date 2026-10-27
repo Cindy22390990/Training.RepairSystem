@@ -41,5 +41,8 @@ public interface IRepairTicketRepository
         CancellationToken cancellationToken = default
     );
 
-
+    Task<List<TicketStatusHistory>> GetStatusHistoryAsync(
+        int ticketId,
+        CancellationToken cancellationToken = default
+);
 }

@@ -29,7 +29,13 @@ namespace Training.RepairSystem
 
             builder.Host.UseNLog();
             // 加入 Controller 支援。
-            builder.Services.AddControllers();
+            builder.Services
+                .AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler =
+                        System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                });
             // 加入 API Endpoint 探索服務。
             builder.Services.AddEndpointsApiExplorer();
             // 加入 Swagger 文件產生器。
