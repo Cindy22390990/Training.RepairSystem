@@ -235,12 +235,32 @@ public class RepairTicketController : ControllerBase
         CancellationToken cancellationToken
     )
     {
+        var userIdClaim =
+    User.FindFirst(
+        ClaimTypes.NameIdentifier
+    );
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+        int userId =
+            int.Parse(userIdClaim.Value);
+
+        var role =
+            User.FindFirst(
+                ClaimTypes.Role
+            )?.Value;
         var result =
             await _repairTicketService.GetStatusHistoryAsync(
-                id,
-                cancellationToken
-            );
+            id,
+            userId,
+            role,
+            cancellationToken
+        );
 
         return Ok(result);
+
     }
 }

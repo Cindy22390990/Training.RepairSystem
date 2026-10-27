@@ -1,4 +1,5 @@
-﻿using Training.RepairSystem.Models;
+﻿using System.Net.Sockets;
+using Training.RepairSystem.Models;
 using Training.RepairSystem.Models.DTOs;
 using Training.RepairSystem.Repositories.Interfaces;
 using Training.RepairSystem.Services.Interfaces;
@@ -135,71 +136,71 @@ public class RepairTicketService : IRepairTicketService
 
                 previewPath = null;
             }
-            else
+                else
+                {
+                    previewPath =
+                        Path.Combine(
+                            "uploads",
+                            previewFileName
+                        )
+                        .Replace("\\", "/");
+                }
+
+        }
+
+            // 建立一個新的 RepairTicket 物件。
+            var ticket = new RepairTicket
             {
-                previewPath =
-                    Path.Combine(
-                        "uploads",
-                        previewFileName
-                    )
-                    .Replace("\\", "/");
-            }
-
-    }
-
-    // 建立一個新的 RepairTicket 物件。
-    var ticket = new RepairTicket
-    {
-        // 設定維修單擁有者。
-        OwnerUserId = userId,
+                // 設定維修單擁有者。
+                OwnerUserId = userId,
 
 
-        // 設定設備名稱。
-        EquipmentName = request.EquipmentName,
+                // 設定設備名稱。
+                EquipmentName = request.EquipmentName,
 
 
-        // 設定故障描述。
-        Description = request.Description,
+                // 設定故障描述。
+                Description = request.Description,
 
 
-        // 設定優先級。
-        Priority = request.Priority,
+                // 設定優先級。
+                Priority = request.Priority,
 
 
-        // 新建立立時狀態。
-        Status = "Open",
+                // 新建立立時狀態。
+                Status = "Open",
 
 
-        // 原始照片。
-        PhotoPath = photoPath,
+                // 原始照片。
+                PhotoPath = photoPath,
 
 
-        // Python產生的Preview。
-        PreviewPath = previewPath,
+                // Python產生的Preview。
+                PreviewPath = previewPath,
 
 
-        // 建立時間。
-        CreatedAtUtc = DateTime.UtcNow,
+                // 建立時間。
+                CreatedAtUtc = DateTime.UtcNow,
 
 
-        // 更新時間。
-        UpdatedAtUtc = DateTime.UtcNow
-    };
+                // 更新時間。
+                UpdatedAtUtc = DateTime.UtcNow
+            };
 
-    // 呼叫 Repository 新增資料。
-    await _repository.AddAsync(
-        ticket,
-        cancellationToken
+            // 呼叫 Repository 新增資料。
+            await _repository.AddAsync(
+                ticket,
+                cancellationToken
  
-    );
-    _logger.LogInformation(
-        "建立報修工單成功，TicketId:{TicketId}, UserId:{UserId}",
-        ticket.Id,
-        userId
-    );
+            );
+            _logger.LogInformation(
+                "建立報修工單成功，TicketId:{TicketId}, UserId:{UserId}",
+                ticket.Id,
+                userId
+            );
 
-        // 回傳新增完成後的維修單。
-        return ticket;
+                // 回傳新增完成後的維修單。
+                return ticket;
     }
 
     // 2. 查詢自己的報修列表
@@ -228,10 +229,10 @@ public class RepairTicketService : IRepairTicketService
     // 3. 查詢單筆工單
     // GET /api/RepairTicket/{id}
     public async Task<RepairTicket?> GetByIdAsync(
-    int id,
-    int userId,
-    string? role,
-    CancellationToken cancellationToken = default
+        int id,
+        int userId,
+        string? role,
+        CancellationToken cancellationToken = default
     )
     {
 
@@ -258,10 +259,10 @@ public class RepairTicketService : IRepairTicketService
     // 5. 更新工單狀態
     // PUT /api/RepairTicket/{id}/status
     public async Task<RepairTicket?> UpdateStatusAsync(
-    int id,
-    string status,
-    int userId,
-    CancellationToken cancellationToken = default
+        int id,
+        string status,
+        int userId,
+        CancellationToken cancellationToken = default
     )
     {
         // 呼叫 Repository 層的 UpdateStatusAsync 。
@@ -297,12 +298,36 @@ public class RepairTicketService : IRepairTicketService
     }
     public async Task<List<TicketStatusHistoryDto>> GetStatusHistoryAsync(
         int ticketId,
+        int userId,
+        string? role,
         CancellationToken cancellationToken = default
     )
-    {
+        {
+            _logger.LogInformation(
+            "查詢歷程 TicketId:{TicketId}, UserId:{UserId}, Role:{Role}",
+            ticketId,
+            userId,
+            role
+        );
+        var ticket =
+            await _repository.GetByIdAsync(
+                ticketId,
+                userId,
+                role,
+                cancellationToken
+            );
+
+        if (ticket == null)
+        {
+            return new List<TicketStatusHistoryDto>();
+        }
+
+
         var histories =
             await _repository.GetStatusHistoryAsync(
                 ticketId,
+                userId,
+                role,
                 cancellationToken
             );
 
@@ -326,6 +351,6 @@ public class RepairTicketService : IRepairTicketService
 
             })
             .ToList();
-    }
+            }
 
 }

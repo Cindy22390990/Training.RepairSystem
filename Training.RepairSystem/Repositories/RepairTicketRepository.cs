@@ -173,14 +173,32 @@ public class RepairTicketRepository : IRepairTicketRepository
     }
 
     public async Task<List<TicketStatusHistory>> GetStatusHistoryAsync(
-    int ticketId,
-    CancellationToken cancellationToken = default
-)
+        int ticketId,
+        int userId,
+        string? role,
+        CancellationToken cancellationToken = default
+    )
     {
-        return await _context.TicketStatusHistories
-            .Where(x => x.TicketId == ticketId)
+        var query =
+            _context.TicketStatusHistories
+            .Include(x => x.Ticket)
+            .Where(x => x.TicketId == ticketId);
+
+        // Employee 只能查看自己的工單歷程
+        if (role != "Maintenance")
+        {
+            query = query.Where(
+                x => x.Ticket.OwnerUserId == userId
+            );
+        }
+
+
+
+        return await query
             .OrderBy(x => x.ChangedAtUtc)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(
+                cancellationToken
+            );
     }
 
 }

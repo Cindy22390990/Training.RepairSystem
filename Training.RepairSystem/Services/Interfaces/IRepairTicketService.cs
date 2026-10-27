@@ -47,6 +47,8 @@ namespace Training.RepairSystem.Services.Interfaces
 
         Task<List<TicketStatusHistoryDto>> GetStatusHistoryAsync(
             int ticketId,
+            int userId,
+            string? role,
             CancellationToken cancellationToken = default
         );
     }

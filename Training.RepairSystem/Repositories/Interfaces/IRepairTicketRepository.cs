@@ -43,6 +43,8 @@ public interface IRepairTicketRepository
 
     Task<List<TicketStatusHistory>> GetStatusHistoryAsync(
         int ticketId,
+        int userId,
+        string? role,
         CancellationToken cancellationToken = default
-);
+    );
 }
