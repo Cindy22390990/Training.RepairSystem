@@ -14,16 +14,12 @@ public class RepairTicketService : IRepairTicketService
     // Python/OpenCV服務
     private readonly IPythonImageService _pythonImageService;
 
-    // 取得 wwwroot 路徑
-    private readonly IWebHostEnvironment _environment;
-
     private readonly ILogger<RepairTicketService> _logger;
 
     public RepairTicketService(
     IRepairTicketRepository repository,
     IPhotoService photoService,
     IPythonImageService pythonImageService,
-    IWebHostEnvironment environment,
     ILogger<RepairTicketService> logger
 )
     {
@@ -32,8 +28,6 @@ public class RepairTicketService : IRepairTicketService
         _photoService = photoService;
 
         _pythonImageService = pythonImageService;
-
-        _environment = environment;
 
         _logger = logger;
     }
@@ -109,12 +103,12 @@ public class RepairTicketService : IRepairTicketService
                 photoPath
             );
 
-        // Preview 圖位置。
-        var previewFileName =
-            $"preview_{Path.GetFileName(photoPath)}";
+            // Preview 圖位置。
+            var previewFileName =
+                $"preview_{Guid.NewGuid()}.png";
 
 
-        var outputPath =
+            var outputPath =
             Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
@@ -139,18 +133,18 @@ public class RepairTicketService : IRepairTicketService
                     pythonResult.Message
                 );
 
-                return null;
+                previewPath = null;
+            }
+            else
+            {
+                previewPath =
+                    Path.Combine(
+                        "uploads",
+                        previewFileName
+                    )
+                    .Replace("\\", "/");
             }
 
-
-
-            // 存資料庫使用相對路徑。
-            previewPath =
-            Path.Combine(
-                "uploads",
-                previewFileName
-            )
-            .Replace("\\", "/");
     }
 
     // 建立一個新的 RepairTicket 物件。
@@ -266,15 +260,17 @@ public class RepairTicketService : IRepairTicketService
     public async Task<RepairTicket?> UpdateStatusAsync(
     int id,
     string status,
+    int userId,
     CancellationToken cancellationToken = default
     )
     {
         // 呼叫 Repository 層的 UpdateStatusAsync 。
         var ticket =
             await _repository.UpdateStatusAsync(
-                id,
-                status,
-                cancellationToken
+            id,
+            status,
+            userId,
+            cancellationToken
             );
 
 
@@ -290,9 +286,10 @@ public class RepairTicketService : IRepairTicketService
 
 
         _logger.LogInformation(
-            "更新工單狀態成功，TicketId:{TicketId}, Status:{Status}",
+            "更新工單狀態成功，TicketId:{TicketId}, Status:{Status}, UserId:{UserId}",
             id,
-            status
+            status,
+            userId
         );
 
 

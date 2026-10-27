@@ -99,9 +99,10 @@ public class RepairTicketRepository : IRepairTicketRepository
     // 5. 更新工單狀態
     // PUT /api/RepairTicket/{id}/status
     public async Task<RepairTicket?> UpdateStatusAsync(
-    int id,
-    string status,
-    CancellationToken cancellationToken = default
+        int id,
+        string status,
+        int userId,
+        CancellationToken cancellationToken = default
     )
     {
         // 從資料庫的 RepairTickets 表查詢資料。
@@ -118,12 +119,48 @@ public class RepairTicketRepository : IRepairTicketRepository
             return null;
         }
 
+        var allowedStatuses = new[]
+        {
+            "Open",
+            "InProgress",
+            "Resolved"
+        };
+
+
+        if (!allowedStatuses.Contains(status))
+        {
+            return null;
+        }
+        // 原本狀態
+        var oldStatus = ticket.Status;
+
         // 修改維修單狀態。
         ticket.Status = status;
+
         // 更新最後修改時間。
         ticket.UpdatedAtUtc = DateTime.UtcNow;
 
-        // 將修改寫入資料庫。
+
+        // 建立狀態歷程紀錄
+        var history = new TicketStatusHistory
+        {
+            TicketId = ticket.Id,
+
+            OldStatus = oldStatus,
+
+            NewStatus = status,
+
+            ChangedByUserId = userId,
+
+            ChangedAtUtc = DateTime.UtcNow
+        };
+
+
+        // 加入狀態歷程資料表
+        _context.TicketStatusHistories.Add(history);
+
+
+        // 一次儲存工單 + 歷程
         await _context.SaveChangesAsync(
             cancellationToken
         );

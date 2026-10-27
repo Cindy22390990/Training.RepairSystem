@@ -170,6 +170,24 @@ public class RepairTicketController : ControllerBase
         CancellationToken cancellationToken
     )
     {
+        // 從 JWT 取得登入者 ID
+        var userIdClaim =
+            User.FindFirst(
+                ClaimTypes.NameIdentifier
+            );
+
+
+        if (userIdClaim == null)
+        {
+            return Unauthorized();
+        }
+
+
+        int userId =
+            int.Parse(
+                userIdClaim.Value
+            );
+
         //驗證
         var allowedStatuses = new[]
         {
@@ -186,11 +204,12 @@ public class RepairTicketController : ControllerBase
         }
 
         var result =
-            await _repairTicketService.UpdateStatusAsync(
-                id,
-                request.Status,
-                cancellationToken
-            );
+        await _repairTicketService.UpdateStatusAsync(
+            id,
+            request.Status,
+            userId,
+            cancellationToken
+        );
 
         // Service 回傳 null。
         if (result == null)

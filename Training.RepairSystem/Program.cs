@@ -35,6 +35,7 @@ namespace Training.RepairSystem
             // 加入 Swagger 文件產生器。
             builder.Services.AddSwaggerGen(options =>
             {
+                options.CustomSchemaIds(type => type.FullName);
                 options.AddSecurityDefinition(
                     "Bearer",
                     new Microsoft.OpenApi.OpenApiSecurityScheme
@@ -120,7 +121,7 @@ namespace Training.RepairSystem
             builder.Services.AddOpenApi();
             // 根據前面設定建立 Web Application。
             var app = builder.Build();
-
+            app.UseExceptionHandler("/error");
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -128,8 +129,6 @@ namespace Training.RepairSystem
 
                 app.UseSwaggerUI();
             }
-
-            app.UseExceptionHandler("/error");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             // 強制 HTTP 轉 HTTPS。

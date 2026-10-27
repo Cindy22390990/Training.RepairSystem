@@ -41,6 +41,7 @@ namespace Training.RepairSystem.Services.Interfaces
         Task<RepairTicket?> UpdateStatusAsync(
             int id,
             string status,
+            int userId,
             CancellationToken cancellationToken = default
         );
         

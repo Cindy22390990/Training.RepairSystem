@@ -37,8 +37,9 @@ public interface IRepairTicketRepository
     Task<RepairTicket?> UpdateStatusAsync(
         int id,
         string status,
+        int userId,
         CancellationToken cancellationToken = default
     );
-    
+
 
 }

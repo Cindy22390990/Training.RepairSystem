@@ -3,9 +3,10 @@
 namespace Training.RepairSystem.Controllers;
 
 [ApiController]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorController : ControllerBase
 {
-    [Route("/error")]
+    [HttpGet("/error")]
     public IActionResult Error()
     {
         return Problem(

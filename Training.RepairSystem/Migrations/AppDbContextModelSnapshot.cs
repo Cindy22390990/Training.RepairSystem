@@ -17,7 +17,7 @@ namespace Training.RepairSystem.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -35,7 +35,8 @@ namespace Training.RepairSystem.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("EquipmentName")
                         .IsRequired()
@@ -71,6 +72,40 @@ namespace Training.RepairSystem.Migrations
                     b.HasIndex("OwnerUserId");
 
                     b.ToTable("RepairTickets");
+                });
+
+            modelBuilder.Entity("Training.RepairSystem.Models.TicketStatusHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ChangedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ChangedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NewStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("TicketStatusHistories");
                 });
 
             modelBuilder.Entity("Training.RepairSystem.Models.UserAccount", b =>
@@ -118,10 +153,26 @@ namespace Training.RepairSystem.Migrations
                     b.HasOne("Training.RepairSystem.Models.UserAccount", "OwnerUser")
                         .WithMany("RepairTickets")
                         .HasForeignKey("OwnerUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("OwnerUser");
+                });
+
+            modelBuilder.Entity("Training.RepairSystem.Models.TicketStatusHistory", b =>
+                {
+                    b.HasOne("Training.RepairSystem.Models.RepairTicket", "Ticket")
+                        .WithMany("StatusHistories")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
+                });
+
+            modelBuilder.Entity("Training.RepairSystem.Models.RepairTicket", b =>
+                {
+                    b.Navigation("StatusHistories");
                 });
 
             modelBuilder.Entity("Training.RepairSystem.Models.UserAccount", b =>

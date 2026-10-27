@@ -41,5 +41,9 @@ public class RepairTicket
 
     // 更新時間
     public DateTime UpdatedAtUtc { get; set; }
-
+    public ICollection<TicketStatusHistory> StatusHistories
+    {
+        get; set;
+    }
+    = new List<TicketStatusHistory>();
 }

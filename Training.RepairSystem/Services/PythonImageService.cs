@@ -7,6 +7,11 @@ namespace Training.RepairSystem.Services;
 
 public class PythonImageService : IPythonImageService
 {
+    private static readonly JsonSerializerOptions JsonOptions =
+    new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
     // 讀取 appsettings.json。
     private readonly IConfiguration _configuration;
     private readonly ILogger<PythonImageService> _logger;
