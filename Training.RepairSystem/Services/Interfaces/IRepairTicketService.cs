@@ -45,7 +45,7 @@ namespace Training.RepairSystem.Services.Interfaces
             CancellationToken cancellationToken = default
         );
 
-        Task<List<TicketStatusHistoryDto>> GetStatusHistoryAsync(
+        Task<List<TicketStatusHistoryDto>?> GetStatusHistoryAsync(
             int ticketId,
             int userId,
             string? role,

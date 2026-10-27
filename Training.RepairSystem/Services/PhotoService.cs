@@ -1,4 +1,4 @@
-﻿
+﻿using OpenCvSharp;
 using Training.RepairSystem.Services.Interfaces;
 
 namespace Training.RepairSystem.Services;
@@ -55,15 +55,9 @@ public class PhotoService : IPhotoService
                 ".png"
             };
 
-
-
         var extension =
-            Path.GetExtension(
-                file.FileName
-            )
+            Path.GetExtension(file.FileName)
             .ToLower();
-
-
 
         if (!allowedExtensions.Contains(extension))
         {
@@ -76,28 +70,58 @@ public class PhotoService : IPhotoService
         }
 
 
+        // 驗證圖片是否真的可讀
 
-        // 建立儲存資料夾
-        var webRootPath =
-            _environment.WebRootPath;
+        using var inputStream =
+           file.OpenReadStream();
 
 
-        // 如果沒有 wwwroot
-        if (string.IsNullOrEmpty(webRootPath))
+        using var memoryStream =
+            new MemoryStream();
+
+
+        await inputStream.CopyToAsync(
+            memoryStream,
+            cancellationToken
+        );
+
+
+        var bytes =
+            memoryStream.ToArray();
+
+
+        using var mat =
+            Cv2.ImDecode(
+                bytes,
+                ImreadModes.Color
+            );
+
+
+        if (mat.Empty())
         {
-            webRootPath =
-                Path.Combine(
-                    Directory.GetCurrentDirectory(),
-                    "wwwroot"
-                );
+            _logger.LogWarning(
+                "圖片內容無法解析"
+            );
+
+            return null;
         }
 
 
 
+        if (mat.Empty())
+        {
+            _logger.LogWarning(
+                "圖片內容無法解析"
+            );
+
+            return null;
+        }
+        // 建立 Storage/Uploads
         var uploadFolder =
             Path.Combine(
-                webRootPath,
-                "uploads"
+                Directory.GetCurrentDirectory(),
+                "Storage",
+                "Uploads"
             );
 
 
@@ -108,7 +132,7 @@ public class PhotoService : IPhotoService
 
 
 
-        // 重新產生檔名
+        // 伺服器產生檔名
         var fileName =
             $"{Guid.NewGuid()}{extension}";
 
@@ -121,25 +145,24 @@ public class PhotoService : IPhotoService
 
 
 
-        using (var stream =
+        using (
+            var fileStream =
             new FileStream(
                 filePath,
                 FileMode.Create
-            ))
+            )
+        )
         {
-
             await file.CopyToAsync(
-                stream,
+                fileStream,
                 cancellationToken
             );
-
         }
 
 
 
-
-        // 回傳相對路徑
         return
-            $"uploads/{fileName}";
+            $"Storage/Uploads/{fileName}";
+        
     }
 }

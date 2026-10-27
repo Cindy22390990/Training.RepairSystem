@@ -96,26 +96,37 @@ public class RepairTicketService : IRepairTicketService
                 return null;
             }
 
-            // 原圖完整路徑。
+            // 原圖完整路徑
             var inputPath =
-            Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                photoPath
-            );
+                Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    photoPath
+                );
 
             // Preview 圖位置。
             var previewFileName =
                 $"preview_{Guid.NewGuid()}.png";
 
 
+            var resultFolder =
+                Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "Storage",
+                    "Results"
+                );
+
+
+            if (!Directory.Exists(resultFolder))
+            {
+                Directory.CreateDirectory(resultFolder);
+            }
+
+
             var outputPath =
-            Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "uploads",
-                previewFileName
-            );
+                Path.Combine(
+                    resultFolder,
+                    previewFileName
+                );
 
             var pythonResult =
                     await _pythonImageService.ProcessImageAsync(
@@ -138,12 +149,13 @@ public class RepairTicketService : IRepairTicketService
             }
                 else
                 {
-                    previewPath =
-                        Path.Combine(
-                            "uploads",
-                            previewFileName
-                        )
-                        .Replace("\\", "/");
+                previewPath =
+                    Path.Combine(
+                        "Storage",
+                        "Results",
+                        previewFileName
+                    )
+                    .Replace("\\", "/");
                 }
 
         }
@@ -296,7 +308,7 @@ public class RepairTicketService : IRepairTicketService
 
         return ticket;
     }
-    public async Task<List<TicketStatusHistoryDto>> GetStatusHistoryAsync(
+    public async Task<List<TicketStatusHistoryDto>?> GetStatusHistoryAsync(
         int ticketId,
         int userId,
         string? role,
@@ -319,7 +331,7 @@ public class RepairTicketService : IRepairTicketService
 
         if (ticket == null)
         {
-            return new List<TicketStatusHistoryDto>();
+            return null;
         }
 
 

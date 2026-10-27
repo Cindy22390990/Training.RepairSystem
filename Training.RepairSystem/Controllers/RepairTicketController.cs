@@ -236,8 +236,8 @@ public class RepairTicketController : ControllerBase
     )
     {
         var userIdClaim =
-    User.FindFirst(
-        ClaimTypes.NameIdentifier
+        User.FindFirst(
+            ClaimTypes.NameIdentifier
     );
 
         if (userIdClaim == null)
@@ -259,6 +259,12 @@ public class RepairTicketController : ControllerBase
             role,
             cancellationToken
         );
+
+        if (result == null)
+        {
+            return NotFound();
+        }
+
 
         return Ok(result);
 
